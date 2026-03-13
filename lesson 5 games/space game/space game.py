@@ -1,23 +1,31 @@
 import random
 import pgzrun
+import time
+strtTime=time.time()
 WIDTH=400
 HEIGHT=400
 satList=[]
 locList=[]
-i=0
+nextSat=0
 loc1x=999
 loc1y=999
 loc2x=999
 loc2y=999
+end=False
 for i in range(10):
     sat=Actor("satellite")
     x=random.randint(20,380)
     y=random.randint(20,380)
     sat.pos=(x,y)
     satList.append(sat)
+def end1():
+    global end
+    end=True
+def update():
+    pass
 def draw():
     x=1
-    global loc1,loc2
+    global loc1,loc2,strtTime,endTime
     screen.blit("background",(0,0))
     for i in satList:
         i.draw()
@@ -25,17 +33,29 @@ def draw():
         x+=1
     for i in locList:
         screen.draw.line(i[0],i[1],"red")
-def on_mouse_down(pos):
-    global i,loc1x,loc1y,loc2x,loc2y,locList
-    if satList[i].collidepoint(pos):
-        if i>0:
-            loc1x=satList[i-1].x
-            loc1y=satList[i-1].y
-            loc2x=satList[i].x
-            loc2y=satList[i].y
-            locList.append(((loc1x,loc1y),(loc2x,loc2y)))
-        i+=1
+    if nextSat<10:
+        endTime=time.time()
+        x=endTime-strtTime
+        screen.draw.text(str(round(x,2)),(0,0))
     else:
-        i=1
+        screen.draw.text(str(round(x,2)),(0,0))
+        screen.draw.text("You Win",center=(200,200),fontsize=50,color="white")
+        clock.unschedule(end1)
+    if end:
+        screen.fill("black")
+        screen.draw.text("Gameover",center=(200,200),fontsize=50,color="white")
+def on_mouse_down(pos):
+    global nextSat,loc1x,loc1y,loc2x,loc2y,locList
+    if satList[nextSat].collidepoint(pos):
+        if nextSat>0:
+            loc1x=satList[nextSat-1].x
+            loc1y=satList[nextSat-1].y
+            loc2x=satList[nextSat].x
+            loc2y=satList[nextSat].y
+            locList.append(((loc1x,loc1y),(loc2x,loc2y)))
+        nextSat+=1
+    else:
+        nextSat=1
         locList=[]
+clock.schedule(end1,15.0)
 pgzrun.go()
